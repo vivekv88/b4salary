@@ -1,5 +1,6 @@
 import { pool } from '../config/db.js';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt'
 
 // Register user
 export const register = async (req, res) => {
@@ -37,10 +38,12 @@ export const register = async (req, res) => {
       });
     }
 
-    // TODO: Hash password using bcrypt before storing
+    // Hash password using bcrypt
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const [result] = await connection.query(
-      'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-      [name, email, password]
+      'INSERT INTO users (`name`, `email`, `password`) VALUES (?, ?, ?)',
+      [name, email, hashedPassword]
     );
 
     connection.release();
@@ -64,7 +67,6 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validation
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -74,7 +76,6 @@ export const login = async (req, res) => {
 
     const connection = await pool.getConnection();
 
-    // Find user
     const [users] = await connection.query(
       'SELECT * FROM users WHERE email = ?',
       [email]
@@ -91,22 +92,23 @@ export const login = async (req, res) => {
 
     const user = users[0];
 
+    // Compare password using bcrypt
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
 
-    if (user.password !== password) {
+    if (!isPasswordMatch) {
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password',
       });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRE || '7d' }
     );
 
-    // Set cookie
+    
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

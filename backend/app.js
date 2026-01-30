@@ -2,15 +2,13 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-
-// Load environment variables
 dotenv.config();
 
-// Import routes
+// routes
 import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 
-// Create Express app
+
 const app = express();
 
 // Middleware
@@ -23,11 +21,6 @@ app.use(
     credentials: true,
   })
 );
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server is running' });
-});
 
 // API Routes
 app.use('/api/auth', authRoutes);
