@@ -25,6 +25,7 @@ app.use(
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/lead',userRoutes);
 
 // Root route
 app.get('/', (req, res) => {

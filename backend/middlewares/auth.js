@@ -34,14 +34,3 @@ export const isAuthenticated = (req, res, next) => {
   }
   next();
 };
-
-// Check if user is admin (optional - customize based on your needs)
-export const isAdmin = (req, res, next) => {
-  if (!req.user || req.user.role !== 'admin') {
-    return res.status(403).json({
-      success: false,
-      message: 'Admin access required',
-    });
-  }
-  next();
-};

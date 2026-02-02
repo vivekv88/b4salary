@@ -1,5 +1,3 @@
-// User Model
-// This file contains database schema documentation for the users table
 
 /*
 CREATE TABLE users (

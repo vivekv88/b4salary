@@ -5,6 +5,7 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  mobile_register
 } from '../controllers/userController.js';
 import { verifyToken } from '../middlewares/auth.js';
 
@@ -18,5 +19,6 @@ router.get('/:id', getUserById);
 router.post('/', verifyToken, createUser);
 router.put('/:id', verifyToken, updateUser);
 router.delete('/:id', verifyToken, deleteUser);
+router.post('/register_mobile', mobile_register);
 
 export default router;

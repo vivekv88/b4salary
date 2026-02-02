@@ -181,3 +181,77 @@ export const deleteUser = async (req, res) => {
     });
   }
 };
+
+export const mobile_register = async (req,res) => {
+  try {
+    const {mobile, tnc} = req.body;
+
+    const connection = await pool.getConnection();
+    const [lead] = await connection.query(
+      'SELECT * FROM cus_lead WHERE mobile = ?',
+      [mobile]
+    );
+
+    if(lead.length !== 0){
+      return res.status(400).json({
+        success: false,
+        message: "User already exists"
+      });
+    }
+
+    if(mobile.length === 0){
+      return res.status(400).json({
+        success: false,
+        message: "Mobile number is required"
+      });
+    }
+
+    const mobileRegex = /^[0-9]+$/;
+    if (!mobileRegex.test(mobile)) {
+      return res.status(400).json({
+        success: false,
+        message: "Mobile number must contain only digits"
+      });
+    }
+
+    if(mobile.length < 10 || mobile.length > 10){
+      return res.status(400).json({
+        success: false,
+        message: "Mobile number must be of 10-digits"
+      });
+    }
+
+    if(!tnc){
+      return res.status(400).json({
+        success: false,
+        message: "You must accept our Terms & Conditions"
+      });
+    }
+
+    const otp = Math.floor(1000 + Math.random() * 9000);
+    console.log(`OTP for ${mobile}: ${otp}`);
+
+    const [result] = await connection.query(
+      'INSERT INTO cus_lead (`mobile`, `tnc`, `OTP`) VALUES (?, ?, ?)',
+      [mobile, tnc, otp]
+    );
+
+    connection.release();
+
+    return res.status(200).json({
+      success: true,
+      message: `OTP sent successfully to ${mobile} mobile number`,
+      data:{
+        id: result.insertId,
+      }
+    });
+  } catch (error) {
+    if(error){
+      console.log(error);
+    }
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+}
