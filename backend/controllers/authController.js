@@ -1,6 +1,7 @@
 import { pool } from '../config/db.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt'
+import validator from 'validator'
 
 // Register user
 export const register = async (req, res) => {
@@ -13,6 +14,13 @@ export const register = async (req, res) => {
         success: false,
         message: 'Please provide all required fields',
       });
+    }
+
+    if(!validator.isEmail(email)){
+      return res.status(400).json({
+        success: false,
+        message : "Please enter a valid email"
+      })
     }
 
     if (password !== confirmPassword) {
